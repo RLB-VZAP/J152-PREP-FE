@@ -62,7 +62,7 @@
 
                     <!-- ===================== LOGIN ===================== -->
                     <form method="post"
-                          action="${pageContext.request.contextPath}/auth"
+                          action="/AuthServlet"
                           class="space-y-4 ${param.mode eq 'register' ? 'hidden' : ''}">
                         <input type="hidden" name="action" value="login">
 
@@ -86,6 +86,8 @@
                         </div>
 
                         <button type="submit"
+                                name="submit"
+                                value="login"
                                 class="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:outline-none">
                             Sign in
                         </button>
@@ -98,7 +100,7 @@
 
                     <!-- ==================== REGISTER ==================== -->
                     <form method="post"
-                          action="${pageContext.request.contextPath}/auth"
+                          action="/AuthServlet"
                           class="space-y-4 ${param.mode eq 'register' ? '' : 'hidden'}">
                         <input type="hidden" name="action" value="register">
 
@@ -142,6 +144,8 @@
                         </div>
 
                         <button type="submit"
+                                name="submit"
+                                value="register"
                                 class="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:outline-none">
                             Create account
                         </button>
