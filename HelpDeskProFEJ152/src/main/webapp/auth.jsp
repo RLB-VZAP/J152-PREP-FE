@@ -20,9 +20,9 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tailwind.css">
     </head>
     <body class="min-h-screen bg-slate-100 text-slate-800 antialiased">
-
+        
         <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
-
+            
             <header class="mb-6 text-center">
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900">HelpDeskPro</h1>
                 <p class="mt-1 text-sm text-slate-500">Support ticket management</p>
@@ -43,16 +43,15 @@
                 </nav>
 
                 <div class="p-6">
-
-                    <!-- Error banner -->
-                    <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 ${empty param.error ? 'hidden' : ''}"
+                    <%
+                        String error = (String) request.getAttribute("error");
+                        if(error != null){
+                    %>
+                    <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                          role="alert">
-                        ${param.error eq 'invalid'  ? 'Incorrect email or password.' : ''}
-                        ${param.error eq 'exists'   ? 'An account with that email already exists.' : ''}
-                        ${param.error eq 'mismatch' ? 'The passwords entered do not match.' : ''}
-                        ${param.error eq 'inactive' ? 'This account has been deactivated. Contact an administrator.' : ''}
-                        ${param.error eq 'required' ? 'Please complete all required fields.' : ''}
+                        <%=error%>
                     </div>
+                    <%}%>
 
                     <!-- Success banner -->
                     <div class="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 ${empty param.success ? 'hidden' : ''}"
@@ -62,7 +61,7 @@
 
                     <!-- ===================== LOGIN ===================== -->
                     <form method="post"
-                          action="/AuthServlet"
+                          action="AuthServlet"
                           class="space-y-4 ${param.mode eq 'register' ? 'hidden' : ''}">
                         <input type="hidden" name="action" value="login">
 
@@ -100,7 +99,7 @@
 
                     <!-- ==================== REGISTER ==================== -->
                     <form method="post"
-                          action="/AuthServlet"
+                          action="AuthServlet"
                           class="space-y-4 ${param.mode eq 'register' ? '' : 'hidden'}">
                         <input type="hidden" name="action" value="register">
 

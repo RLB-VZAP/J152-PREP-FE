@@ -6,10 +6,12 @@ package com.vzap.helpdeskprofe.restclients;
 
 import com.vzap.helpdeskprofe.model.user.User;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import tools.jackson.databind.ObjectMapper;
 
@@ -22,9 +24,10 @@ import tools.jackson.databind.ObjectMapper;
 public class AuthRestClient {
     private final String API_URL = "http://localhost:8080/J152-PREP-BE/api";
     ObjectMapper mapper = new ObjectMapper();
+    
     public User register(User user){
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(API_URL + "/auth/register");
+        WebTarget target = client.target(API_URL + "/auth/register?regType=CLIENT");
         
         Response response = target.request().post(Entity.json(user));
         
@@ -44,5 +47,31 @@ public class AuthRestClient {
             }
         }
         
+    }
+
+    public void login(User login, HttpServletRequest request) {
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(API_URL + "/auth/login");
+        
+        Response response = target.request().header(HttpHeaders.AUTHORIZATION, target).post(Entity.json(login));
+        
+        switch(response.getStatusInfo().toEnum()){
+            case OK : {
+                User loggedIn = mapper.readValue(response.readEntity(String.class), User.class);
+                String jwtAuthToken = response.getHeaderString(HttpHeaders.AUTHORIZATION);
+                request.getSession(true).setAttribute("jwtAuthToken", jwtAuthToken);
+                request.getSession().setAttribute("loggedIn", loggedIn);
+                break;
+            }
+//            case BAD_REQUEST : {}
+            case NOT_ACCEPTABLE : {
+                request.setAttribute("error", response.readEntity(String.class));
+                throw new IllegalArgumentException();
+            }
+            default:{
+                request.setAttribute("error", "Something went wrong, please try again later.");
+                throw new IllegalArgumentException();
+            }
+        }
     }
 }

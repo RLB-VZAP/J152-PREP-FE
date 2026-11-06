@@ -20,6 +20,9 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "AuthServlet", urlPatterns = {"/AuthServlet"})
 public class AuthServlet extends HttpServlet {
+
+    private static final System.Logger LOG = System.getLogger(AuthServlet.class.getName());
+    
     @Inject
     private AuthRestClient authClient;
 
@@ -48,12 +51,21 @@ public class AuthServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String submit = request.getParameter("submit");
-        
-        String forwardTo = switch(submit){
+
+        String forwardTo = switch (submit) {
             case "login" -> {
-                
-                //code interacting with the restclient or session context
-                yield "user-dashboard.jsp";
+                User loggedIn = User.builder()
+                        .email(request.getParameter("email"))
+                        .fullName(request.getParameter("fullName"))
+                        .passwordHash(request.getParameter("password"))
+                        .build();
+                try {
+                    this.authClient.login(loggedIn, request);
+                    yield "user-dashboard.jsp";
+                } catch (IllegalArgumentException e) {
+                    LOG.log(System.Logger.Level.ERROR, e);
+                    yield "auth.jsp";
+                }
             }
             case "register" -> {
                 User created = User.builder()
@@ -61,24 +73,26 @@ public class AuthServlet extends HttpServlet {
                         .fullName(request.getParameter("fullName"))
                         .passwordHash(request.getParameter("password"))
                         .build();
-                
-                try{
-                    request.getSession(true).setAttribute("loggedIn", authClient.register(created));
+
+                try {
+                    created = authClient.register(created);
+                    request.getSession(true).setAttribute("loggedIn", created);
                     yield "user-dashboard.jsp";
-                }catch(IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     request.setAttribute("error", e.getMessage());
                     yield "auth.jsp";
                 }
             }
-            
+
             case "logout" -> {
                 request.getSession().invalidate();
                 yield "auth.jsp";
             }
-            
-            default -> "";
+
+            default ->
+                "";
         };
-        
+
         request.getRequestDispatcher(forwardTo).forward(request, response);
     }
 
@@ -91,6 +105,5 @@ public class AuthServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-    
-    
+
 }
